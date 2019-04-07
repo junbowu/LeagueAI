@@ -7,8 +7,10 @@ Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch
 - Create script to automatically split data in train and test set
 
 ## Currently Detectable Objects
+TODO
 
 ## Missing Objects
+- All champions except vayne
 - Add Red inhibitors, nexus, super minions
 - Add Blue towers, nexus, inhibitors, minions
 
@@ -21,10 +23,14 @@ In this project a python implementation of Yolo v3 object detector and a way of 
 TODO: Describe the object detector was implemented and can be used
 
 ## The LeagueAI Dataset
-Creating large datasets from scratch can be very work intensive. For the first implementation of the LeageAI about 700 hand labeled pictures were used. Labeling 700 pictures took about 4 days of work and only included 4 game objects (1 champion model, allied and enemy minions and enemy towers). Therefore, the new dataset was created by automatically generating training data based on 3D models extracted from the game.
+Creating large datasets from scratch can be very work intensive.
+For the first implementation of the LeageAI about 700 hand labeled pictures were used.
+Labeling 700 pictures took about 4 days of work and only included 4 game objects (1 champion model, allied and enemy minions and enemy towers).
+Therefore, the new dataset was created by automatically generating training data based on 3D models extracted from the game.
 
 1. Obtaining champion and minion models form 3D models
-To obtain the image data I used the online League of Legends model viewer from https://teemo.gg/model-viewer. For each ingame object and each animation I recorded a short video clip while rotating the 3D model.
+To obtain the image data I used the online League of Legends model viewer from https://teemo.gg/model-viewer.
+For each ingame object and each animation I recorded a short video clip while rotating the 3D model.
 Next I used the pyFrameExporter.py script to extract individual pictures from the clips.
 For each of the 
 For the minions I used Adobe After Effects to remove the background

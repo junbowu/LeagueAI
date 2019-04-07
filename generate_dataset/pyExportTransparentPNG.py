@@ -4,22 +4,28 @@ from os import listdir
 
 ################# Parameters ########################
 # Input directory of images
-input_dir = "/home/oli/Workspace/LeagueAI/raw_data/red_caster_raw/exported_frames"
+input_dir = "/home/oli/Workspace/LeagueAI/raw_data/vayne_raw/exported_frames"
 # Output directory of masked and cropped images
-output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_minions/red_caster"
+output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_champions/vayne_masked"
 # Area to pre-crop the images to (min_x, min_y, max_x, max_y), can save runtime for large screenshots with small objects
-# Teemo model viewer: (700,300,1240,780)
-area = (0,140,1920,940)
+# Teemo model viewer:
+area = (700,300,1240,780)
+# Greenscreen:
+#area = (0,140,1920,940)
 # Background color in RGB
-# Teemo model viewer pink background (95, 80,170)
-background = (62,255,8)
+# Teemo model viewer pink background
+background = (95, 80,170)
+# Greenscreen
+#background = (62,255,8)
 # The threshold for removing the background color
 # Teemo model viewer tolerance (25)
-tolerance = 120
+tolerance = 25
+# Greenscreen 
+#tolerance = 120
 # This is needed because there is another shade of pink in the background
 tolerance_offset_1 = 1.0
-tolerance_offset_2 = 0.75 # Greenscreen: 1.5
-tolerance_offset_3 = 1.0 # Teemo viewer: 2.5
+tolerance_offset_2 = 1.0 # Greenscreen: 0.74
+tolerance_offset_3 = 2.5 # Teemo viewer: 2.5
 #####################################################
 
 def get_min_max_x(newData, w, h):
