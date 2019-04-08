@@ -2,10 +2,16 @@ import numpy as np
 from PIL import Image
 from os import listdir
 import random
-####### TODO #############
-# - cropping not working properly
-# - turn off red borders
-# - Random pixel noise for more different variations of objects and map screenshots
+
+####### TODO ##############
+# Generate dataset with varying params (also cluster minions tighter maybe a bit)
+####### Object Classes ####
+# 0: Red Tower
+# 6: Red Canon
+# 7: Red Caster
+# 8: Red Melee
+# 14: Vayne
+
 ####### Params ############
 # Print out the status messages and where stuff is placed
 verbose = False
@@ -21,18 +27,18 @@ tower_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_towers"
 # Directory in which the dataset will be stored (creates jpegs and labels subdirectory there)
 output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset"
 # Prints a box around the placed object in red (for debug purposes)
-print_box = True
+print_box = False
 # Size of the datasets the program should generate
-dataset_size = 500
+dataset_size = 10
 # Beginning index for naming output files
-start_index = 2000
+start_index = 0
 # How many characters should be added minimum/maximum to each sample
 characters_min = 0
 characters_max = 2
 assert (characters_min < characters_max), "Error, minions_max needs to be larger than minions_min!"
 # How many minons should be added minimum/maximum to each sample
-minions_min = 2
-minions_max = 12
+minions_min = 1
+minions_max = 10
 assert (minions_min < minions_max), "Error, minions_max needs to be larger than minions_min!"
 # How many towers should be added to each example
 towers_min = 0
@@ -40,12 +46,12 @@ towers_max = 1
 assert (towers_min < towers_max), "Error, towers_max needs to be larger than towers_min!"
 # The scale factor of how much a champion image needs to be scaled to have a realistic size
 # Also you can set a random factor to create more diverse images
-scale_champions = 0.55
-random_scale_champions = 0.1
+scale_champions = 0.7
+random_scale_champions = 0.12
 scale_minions = 1.0
 random_scale_minions = 0.25
 scale_towers = 1.6
-random_scale_towers = 0.3
+random_scale_towers = 0.2
 # Random rotation maximum offset in counter-/clockwise direction
 rotate = 10
 # Make champions seethrough sometimes to simulate them being in a brush, value in percent chance a champion will be seethrough
@@ -56,11 +62,26 @@ output_size = (1920,1080)
 bias_strength = 220
 # Resampling method of the object scaling
 sampling_method = Image.BICUBIC
+# Add random noise to pixels
+noise = (15,15,15)
+# Sometimes randomly add the overlay
+overlay_chance = 20
+overlay_path = "/home/oli/Workspace/LeagueAI/generate_dataset/overlay.png"
 ########### Helper functions ###################
 """
-This function places a masked image with a given path onto a map fragment
+This funciton applies random noise to the rgb values of a pixel (R,G,B)
 """
-def add_object(path, cur_image_path, object_class, bias_point):
+def apply_noise(pixel):
+    R = max(0, min(255, pixel[0] + random.randint(-noise[0], noise[0])))
+    G = max(0, min(255, pixel[1] + random.randint(-noise[1], noise[1])))
+    B = max(0, min(255, pixel[2] + random.randint(-noise[2], noise[2])))
+    A = pixel[3]
+    return (R, G, B, A)
+"""
+This function places a masked image with a given path onto a map fragment
+Passing -1 to the object class allows you to set objects like the UI that are not affected by rotations bias etc.
+"""
+def add_object(path, cur_image_path, object_class, bias_point, last):
     # Set up the map data
     map_image = Image.open(cur_image_path)
     map_image = map_image.convert("RGBA")
@@ -71,8 +92,9 @@ def add_object(path, cur_image_path, object_class, bias_point):
         print("Adding object: ", path)
     # Read the image file of the current object to add
     obj = Image.open(path)
-    # Randomly rotate the image, but make the normal orientation most likely using a normal distribution
-    obj = obj.rotate(np.random.normal(loc=0.0, scale=rotate), expand=True)
+    if object_class >= 0:
+        # Randomly rotate the image, but make the normal orientation most likely using a normal distribution
+        obj = obj.rotate(np.random.normal(loc=0.0, scale=rotate), expand=True)
     obj = obj.convert("RGBA")
     obj_w, obj_h = obj.size
     # Rescale the image based on the scale factor
@@ -85,6 +107,8 @@ def add_object(path, cur_image_path, object_class, bias_point):
     elif object_class == 14: # vayne
         scale_factor = random.uniform(scale_champions-random_scale_champions, scale_champions+random_scale_champions)
         size = int(obj_w*scale_factor), int(obj_h*scale_factor)
+    else:
+        size = int(obj_w), int(obj_h)
     # If the object is a champion make it seethrough sometimes to simulate it being in a brush
     in_brush = False
     if object_class >= 14 and np.random.randint(0,100) > 100-seethrough_prob:
@@ -95,20 +119,18 @@ def add_object(path, cur_image_path, object_class, bias_point):
     # Compute the position of minions based on the bias point. Normally distribute the mininons around 
     # a central point to create clusters of objects for more realistic screenshot fakes
     # Champions and structures are uniformly distributed
-    if object_class >= 14 or object_class < 6:
+    if object_class >= 14 or (object_class < 6 and object_class >= 0):
         obj_pos_center = (random.randint(0, w), random.randint(0, h))
     else:
         obj_pos_center = (int(np.random.normal(loc=bias_point[0], scale = bias_strength)), int(np.random.normal(loc=bias_point[1], scale=bias_strength)))
+    # Catch the -1 object class exception
+    if object_class < 0:
+        obj_pos_center = (int(w/2), int(h/2))
     if verbose:
         print("Placing at : {}|{}".format(obj_pos_center[0], obj_pos_center[1]))
     # Extract the image data
     obj_data = obj.getdata()
     out_data = []
-    # Compute the lowest x and y value that the image has in the gloabl map fragment
-    obj_x_offset_min = max(0, obj_pos_center[0] - int(obj_w / 2))
-    obj_x_offset_max = min(w, obj_pos_center[0] + int(obj_w / 2))
-    obj_y_offset_min = max(0, obj_pos_center[1] - int(obj_h / 2))
-    obj_y_offset_max = min(h, obj_pos_center[1] + int(obj_h / 2))
 
     last_pixel = 0
     # Place the images
@@ -154,17 +176,21 @@ def add_object(path, cur_image_path, object_class, bias_point):
                         pixel = (map_data[map_index][0], map_data[map_index][1], map_data[map_index][2], 255)
                 else:
                     pixel = (map_data[map_index][0], map_data[map_index][1], map_data[map_index][2], map_data[map_index][3])
+            # Apply random noise to the pixel
+            if last:
+                pixel = apply_noise(pixel)
             out_data.append(pixel)
     # Save the image
     map_image.putdata(out_data)
     map_image = map_image.convert("RGB")
     map_image.save(output_dir+"/jpegs/"+filename+".jpg", "JPEG")
-    # Append the bounding box data to the labels file
-    with open(output_dir+"/labels/"+filename+".txt", "a") as f:
-        # Write the position of the object and its bounding box data to the labels file
-        # All values are relative to the whole image size
-        # Format: class, x_pos, y_pos, width, height
-        f.write("" + str(object_class) + " " + str(obj_pos_center[0]/w) + " " + str(obj_pos_center[1]/h) + " " + str(obj_w/w) + " " + str(obj_h/h) + "\n")
+    # Append the bounding box data to the labels file if the object class is not -1
+    if object_class >= 0:
+        with open(output_dir+"/labels/"+filename+".txt", "a") as f:
+            # Write the position of the object and its bounding box data to the labels file
+            # All values are relative to the whole image size
+            # Format: class, x_pos, y_pos, width, height
+            f.write("" + str(object_class) + " " + str(obj_pos_center[0]/w) + " " + str(obj_pos_center[1]/h) + " " + str(obj_w/w) + " " + str(obj_h/h) + "\n")
 
 
 ########### Main function ######################
@@ -224,17 +250,26 @@ for dataset in range(0, dataset_size):
     random.shuffle(objects_to_add)
     # Read in the current map background as image
     map_image = Image.open(mp_fnam)
-    map_image.resize(output_size, resample=sampling_method) 
     w, h = map_image.size
+    # Make sure the image is 1920x1080 (otherwise the overlay might not fit properly)
+    assert (w == 1920 and h == 1080), "Error image has to be 1920x1080" 
+
     map_image.save(output_dir+"/jpegs/"+filename+".jpg", "JPEG")
     cur_image_path = output_dir+"/jpegs/"+filename+".jpg"
     # Iterate through all objects in the order we want them to be added and add them to the backgroundl
     # Note this function also saves the image already
     # Point around which the objects will be clustered
     bias_point = (random.randint(0, w), random.randint(0, h))
+    # Add the overlay, the bias point plays no role here because of the object class (object class -1 is not added to the labels.txt)
+    if random.randint(0,100) > 100 - overlay_chance:
+        add_object(overlay_path, cur_image_path, -1, bias_point, False)
     for i in range(0, len(objects_to_add)):
         o = objects_to_add.pop()
-        add_object(o[0], cur_image_path, o[1], bias_point)
+        if len(objects_to_add) == 0:
+            add_object(o[0], cur_image_path, o[1], bias_point, True)
+            print("applying noise")
+        else:
+            add_object(o[0], cur_image_path, o[1], bias_point, False)
     if verbose:
         print("=======================================")
 
