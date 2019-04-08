@@ -5,6 +5,7 @@ import random
 ####### TODO #############
 # - cropping not working properly
 # - turn off red borders
+# - Random pixel noise for more different variations of objects and map screenshots
 ####### Params ############
 # Print out the status messages and where stuff is placed
 verbose = False
