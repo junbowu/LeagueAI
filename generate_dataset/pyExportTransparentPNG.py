@@ -1,33 +1,57 @@
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 from os import listdir
 
 ################# Parameters ########################
 # Input directory of images
-input_dir = "/home/oli/Workspace/LeagueAI/raw_data/vayne_raw/exported_frames"
+input_dir = "/home/oli/Workspace/LeagueAI/raw_data/red_canon_raw/exported_frames"
 # Output directory of masked and cropped images
-output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_champions/vayne_masked"
+output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_minions/red_canon_test"
 # Area to pre-crop the images to (min_x, min_y, max_x, max_y), can save runtime for large screenshots with small objects
 # Teemo model viewer:
-area = (700,300,1240,780)
+#area = (700,300,1240,780)
 # Greenscreen:
-#area = (0,140,1920,940)
+area = (0,140,1920,940)
 # Background color in RGB
 # Teemo model viewer pink background
-background = (95, 80,170)
+#background = (95, 80,170)
 # Greenscreen
-#background = (62,255,8)
+background = (62,255,8)
 # The threshold for removing the background color
 # Teemo model viewer tolerance (25)
-tolerance = 25
+#tolerance = 25
 # Greenscreen 
-#tolerance = 120
+tolerance = 120
 # This is needed because there is another shade of pink in the background
 tolerance_offset_1 = 1.0
-tolerance_offset_2 = 1.0 # Greenscreen: 0.74
-tolerance_offset_3 = 2.5 # Teemo viewer: 2.5
+tolerance_offset_2 = 0.74 # Greenscreen: 0.74
+tolerance_offset_3 = 1.0 # Teemo viewer: 2.5
 #####################################################
-
+"""
+This function applies a filter to a masked image and can either remove 
+or add differntly colored borders around objects
+"""
+def modify_outline(f, thickness):
+    image = Image.open(output_dir+"/"+f+".png")
+    image = image.convert("RGBA")
+    for t in range(thickness):
+        mask = image.filter(ImageFilter.FIND_EDGES)
+        mask_data = mask.getdata()
+        image_data = image.getdata()
+        w, h = mask_data.size
+ 
+        out_data = []
+        for y in range(0, h): 
+            for x in range(0, w): 
+                index = x + w * y 
+                pixel = (0, 0, 0, 0)
+                if mask_data[index][3] > 0:
+                    pixel = (255, 255, 255, 0)
+                else:
+                    pixel = (image_data[index][0], image_data[index][1], image_data[index][2], image_data[index][3])
+                out_data.append(pixel)
+        image.putdata(out_data)
+    image.save(output_dir+"/"+f+".png", "PNG")
 def get_min_max_x(newData, w, h):
     min_value = 0
     max_value = 0
@@ -83,7 +107,7 @@ for f in files:
     # Remove the jpg ending
     fname = f.split(".")[0]
     print(fname)
-    img = Image.open(input_dir+"/"+f)
+    img = Image.open(input_dir+"/"+fname+".jpg")
     # Add alpha channel
     img = img.convert("RGBA")
 
@@ -113,3 +137,6 @@ for f in files:
     # Save output image as png
     cropped = cropped.crop((min_x, min_y, max_x, max_y))
     cropped.save(output_dir+"/"+fname+".png", "PNG")
+    # Remove the outer layer of pixels to remove artifacts from cropping
+    modify_outline(fname, 1)
+

@@ -5,6 +5,10 @@ import random
 
 ####### TODO ##############
 # Generate dataset with varying params (also cluster minions tighter maybe a bit)
+# Generate dataset with new maske dimages
+# Make sure that we are not outside of the image, the bias padding is maybe not enough
+# retrain with pretrained weights
+# change the classes below
 ####### Object Classes ####
 # 0: Red Tower
 # 6: Red Canon
@@ -25,20 +29,30 @@ map_imags_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/map"
 # Directory in which the tower images are located
 tower_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_towers"
 # Directory in which the dataset will be stored (creates jpegs and labels subdirectory there)
+# Attention if you use darknet to train: the structure has to be exactly as follows:
+# - Dataset
+# -- images
+# --- XYZ0.jpg
+# --- XYZ1.jpg
+# -- labels
+# --- XYZ0.txt
+# --- XYZ1.txt
+# -- train.txt
+# -- test.txt
 output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset"
 # Prints a box around the placed object in red (for debug purposes)
 print_box = False
 # Size of the datasets the program should generate
-dataset_size = 10
+dataset_size = 500
 # Beginning index for naming output files
-start_index = 0
+start_index = 3000
 # How many characters should be added minimum/maximum to each sample
 characters_min = 0
 characters_max = 2
 assert (characters_min < characters_max), "Error, minions_max needs to be larger than minions_min!"
 # How many minons should be added minimum/maximum to each sample
 minions_min = 1
-minions_max = 10
+minions_max = 6
 assert (minions_min < minions_max), "Error, minions_max needs to be larger than minions_min!"
 # How many towers should be added to each example
 towers_min = 0
@@ -46,27 +60,30 @@ towers_max = 1
 assert (towers_min < towers_max), "Error, towers_max needs to be larger than towers_min!"
 # The scale factor of how much a champion image needs to be scaled to have a realistic size
 # Also you can set a random factor to create more diverse images
-scale_champions = 0.7
-random_scale_champions = 0.12
-scale_minions = 1.0
+scale_champions = 0.9 # 0.7 good
+random_scale_champions = 0.12 # 0.12 is good
+scale_minions = 1.3 #1.2 good
 random_scale_minions = 0.25
-scale_towers = 1.6
-random_scale_towers = 0.2
+scale_towers = 1.6 # 1.6 good
+random_scale_towers = 0.2 # 0.2 good
 # Random rotation maximum offset in counter-/clockwise direction
-rotate = 10
+rotate = 5
 # Make champions seethrough sometimes to simulate them being in a brush, value in percent chance a champion will be seethrough
-seethrough_prob = 5
+seethrough_prob = 7
 # Output image size
 output_size = (1920,1080)
 # Factor how close the objects should be clustered around the bias point
-bias_strength = 220
+bias_strength = 180 #220 is good
 # Resampling method of the object scaling
-sampling_method = Image.BICUBIC
+#sampling_method = Image.BICUBIC
+sampling_method = Image.BILINEAR
 # Add random noise to pixels
-noise = (15,15,15)
+noise = (10,10,10)
 # Sometimes randomly add the overlay
 overlay_chance = 20
 overlay_path = "/home/oli/Workspace/LeagueAI/generate_dataset/overlay.png"
+# Dont spawn objects to close to the border of the image, they might disappear
+padding = 30
 ########### Helper functions ###################
 """
 This funciton applies random noise to the rgb values of a pixel (R,G,B)
@@ -183,7 +200,7 @@ def add_object(path, cur_image_path, object_class, bias_point, last):
     # Save the image
     map_image.putdata(out_data)
     map_image = map_image.convert("RGB")
-    map_image.save(output_dir+"/jpegs/"+filename+".jpg", "JPEG")
+    map_image.save(output_dir+"/images/"+filename+".jpg", "JPEG")
     # Append the bounding box data to the labels file if the object class is not -1
     if object_class >= 0:
         with open(output_dir+"/labels/"+filename+".txt", "a") as f:
@@ -254,12 +271,12 @@ for dataset in range(0, dataset_size):
     # Make sure the image is 1920x1080 (otherwise the overlay might not fit properly)
     assert (w == 1920 and h == 1080), "Error image has to be 1920x1080" 
 
-    map_image.save(output_dir+"/jpegs/"+filename+".jpg", "JPEG")
-    cur_image_path = output_dir+"/jpegs/"+filename+".jpg"
+    map_image.save(output_dir+"/images/"+filename+".jpg", "JPEG")
+    cur_image_path = output_dir+"/images/"+filename+".jpg"
     # Iterate through all objects in the order we want them to be added and add them to the backgroundl
     # Note this function also saves the image already
     # Point around which the objects will be clustered
-    bias_point = (random.randint(0, w), random.randint(0, h))
+    bias_point = (random.randint(0+padding, w-padding), random.randint(0+padding, h-padding))
     # Add the overlay, the bias point plays no role here because of the object class (object class -1 is not added to the labels.txt)
     if random.randint(0,100) > 100 - overlay_chance:
         add_object(overlay_path, cur_image_path, -1, bias_point, False)
@@ -267,9 +284,13 @@ for dataset in range(0, dataset_size):
         o = objects_to_add.pop()
         if len(objects_to_add) == 0:
             add_object(o[0], cur_image_path, o[1], bias_point, True)
-            print("applying noise")
         else:
             add_object(o[0], cur_image_path, o[1], bias_point, False)
+    # of no objects were added we still have to create an empty txt file
+    with open(output_dir+"/labels/"+filename+".txt", "a") as f:
+        f.write("")
+
+
     if verbose:
         print("=======================================")
 

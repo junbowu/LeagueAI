@@ -9,7 +9,7 @@ from utils import *
 import argparse
 import os 
 import os.path as osp
-from darknet import Darknet
+from yolov3_detector import Darknet
 import pickle as pkl
 import pandas as pd
 import random
@@ -53,7 +53,7 @@ CUDA = False#torch.cuda.is_available()
 
 
 
-num_classes = 1
+num_classes = 5
 classes = load_classes("/home/oli/Workspace/darknet/data/LeagueAI.names")
 
 

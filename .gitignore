@@ -21,6 +21,7 @@ generate_dataset/Dataset/jpegs/*
 generate_dataset/Dataset/labels/*
 generate_dataset/Dataset/test.txt
 generate_dataset/Dataset/train.txt
-generate_dataset/Dataset_1/*
+generate_dataset/Dataset*
+generate_dataset/overlay.png
 
 
