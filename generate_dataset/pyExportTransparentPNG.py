@@ -2,6 +2,8 @@ from PIL import Image, ImageFilter
 import numpy as np
 from os import listdir
 
+# - There was an error with tile out of range
+
 ################# Parameters ########################
 # Input directory of images
 input_dir = "/home/oli/Workspace/LeagueAI/raw_data/red_canon_raw/exported_frames"
