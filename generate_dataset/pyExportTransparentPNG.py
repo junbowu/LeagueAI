@@ -6,9 +6,9 @@ from os import listdir
 
 ################# Parameters ########################
 # Input directory of images
-input_dir = "/home/oli/Workspace/LeagueAI/raw_data/red_canon_raw/exported_frames"
+input_dir = "/home/oli/Workspace/LeagueAI/raw_data/red_caster_raw/exported_frames"
 # Output directory of masked and cropped images
-output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_minions/red_canon_test"
+output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_minions/red_caster_test"
 # Area to pre-crop the images to (min_x, min_y, max_x, max_y), can save runtime for large screenshots with small objects
 # Teemo model viewer:
 #area = (700,300,1240,780)
@@ -28,6 +28,8 @@ tolerance = 120
 tolerance_offset_1 = 1.0
 tolerance_offset_2 = 0.74 # Greenscreen: 0.74
 tolerance_offset_3 = 1.0 # Teemo viewer: 2.5
+# Remove the outline of the images in case there are any masking artifacts, set the number of layers to be removed
+remove_outline = 1
 #####################################################
 """
 This function applies a filter to a masked image and can either remove 
@@ -140,5 +142,5 @@ for f in files:
     cropped = cropped.crop((min_x, min_y, max_x, max_y))
     cropped.save(output_dir+"/"+fname+".png", "PNG")
     # Remove the outer layer of pixels to remove artifacts from cropping
-    modify_outline(fname, 1)
+    modify_outline(fname, remove_outline)
 

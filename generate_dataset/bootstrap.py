@@ -26,6 +26,8 @@ masked_images_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_champi
 masked_minions = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_minions"
 # Directory in which the map backgrounds are located
 map_imags_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/map"
+# Directory in which the map backgrounds with fog of war are located
+map_fog_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/map_fog"
 # Directory in which the tower images are located
 tower_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_towers"
 # Directory in which the dataset will be stored (creates jpegs and labels subdirectory there)
@@ -39,20 +41,20 @@ tower_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_towers"
 # --- XYZ1.txt
 # -- train.txt
 # -- test.txt
-output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset"
+output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_3"
 # Prints a box around the placed object in red (for debug purposes)
 print_box = False
 # Size of the datasets the program should generate
 dataset_size = 500
 # Beginning index for naming output files
-start_index = 3000
+start_index = 1500
 # How many characters should be added minimum/maximum to each sample
 characters_min = 0
 characters_max = 2
 assert (characters_min < characters_max), "Error, minions_max needs to be larger than minions_min!"
 # How many minons should be added minimum/maximum to each sample
 minions_min = 1
-minions_max = 6
+minions_max = 12
 assert (minions_min < minions_max), "Error, minions_max needs to be larger than minions_min!"
 # How many towers should be added to each example
 towers_min = 0
@@ -60,30 +62,32 @@ towers_max = 1
 assert (towers_min < towers_max), "Error, towers_max needs to be larger than towers_min!"
 # The scale factor of how much a champion image needs to be scaled to have a realistic size
 # Also you can set a random factor to create more diverse images
-scale_champions = 0.9 # 0.7 good
-random_scale_champions = 0.12 # 0.12 is good
-scale_minions = 1.3 #1.2 good
-random_scale_minions = 0.25
+scale_champions = 0.8 # 0.7 good
+random_scale_champions = 0.15 # 0.12 is good
+scale_minions = 1.1 #1.2 good
+random_scale_minions = 0.25 # 0.25 good
 scale_towers = 1.6 # 1.6 good
 random_scale_towers = 0.2 # 0.2 good
 # Random rotation maximum offset in counter-/clockwise direction
-rotate = 5
+rotate = 2
 # Make champions seethrough sometimes to simulate them being in a brush, value in percent chance a champion will be seethrough
-seethrough_prob = 7
+seethrough_prob = 12
 # Output image size
 output_size = (1920,1080)
 # Factor how close the objects should be clustered around the bias point
-bias_strength = 180 #220 is good
+bias_strength = 200 #220 is good
 # Resampling method of the object scaling
 #sampling_method = Image.BICUBIC
 sampling_method = Image.BILINEAR
 # Add random noise to pixels
-noise = (10,10,10)
+noise = (0,0,0)
 # Sometimes randomly add the overlay
-overlay_chance = 20
+overlay_chance = 5
 overlay_path = "/home/oli/Workspace/LeagueAI/generate_dataset/overlay.png"
 # Dont spawn objects to close to the border of the image, they might disappear
-padding = 30
+padding = 0
+# Probability of adding a fog of war screenshot with no objects in it
+fog_of_war_prob = 5
 ########### Helper functions ###################
 """
 This funciton applies random noise to the rgb values of a pixel (R,G,B)
@@ -140,6 +144,14 @@ def add_object(path, cur_image_path, object_class, bias_point, last):
         obj_pos_center = (random.randint(0, w), random.randint(0, h))
     else:
         obj_pos_center = (int(np.random.normal(loc=bias_point[0], scale = bias_strength)), int(np.random.normal(loc=bias_point[1], scale=bias_strength)))
+    if obj_pos_center[0] < 0:
+        obj_pos_center = (0, obj_pos_center[1])
+    if obj_pos_center[0] > w:
+        obj_pos_center = (w, obj_pos_center[1])
+    if obj_pos_center[1] < 0:
+        obj_pos_center = (obj_pos_center[0], 0)
+    if obj_pos_center[1] > h:
+        obj_pos_center = (obj_pos_center[0], h)
     # Catch the -1 object class exception
     if object_class < 0:
         obj_pos_center = (int(w/2), int(h/2))
@@ -248,7 +260,7 @@ for dataset in range(0, dataset_size):
         elif minions_dir == "red_melee":
             minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 8])
         else:
-            print("Error: Could not find folder: ", minions_dir)
+            print("Error: This folder: ", minions_dir, " was not specified to contain masked images. Skipping. Atention! Dataset might be broken!")
     if verbose: 
         print("Adding {} minions!".format(len(minions)))
 
@@ -261,36 +273,43 @@ for dataset in range(0, dataset_size):
     if verbose:
         print("Adding 1 tower!")
 
+    # Add a fog of war / empty screenshot
+    if 100 - fog_of_war_prob < random.randint(0,100):
+        fog_file = random.choice(sorted(listdir(map_fog_dir)))
+        fog_name = map_fog_dir+"/"+fog_file
+        map_image = Image.open(fog_name)
+        map_image.save(output_dir+"/images/"+filename+".jpg", "JPEG")
+        # Save empty label  because we did not place any objects
+        with open(output_dir+"/labels/"+filename+".txt", "a") as f:
+            f.write("")
+    else:
+        # Now figure out the order in which we want to add the objects (So that sometimes objects will overlap)
+        objects_to_add = characters+minions+towers
+        random.shuffle(objects_to_add)
+        # Read in the current map background as image
+        map_image = Image.open(mp_fnam)
+        w, h = map_image.size
+        # Make sure the image is 1920x1080 (otherwise the overlay might not fit properly)
+        assert (w == 1920 and h == 1080), "Error image has to be 1920x1080" 
 
-    # Now figure out the order in which we want to add the objects (So that sometimes objects will overlap)
-    objects_to_add = characters+minions+towers
-    random.shuffle(objects_to_add)
-    # Read in the current map background as image
-    map_image = Image.open(mp_fnam)
-    w, h = map_image.size
-    # Make sure the image is 1920x1080 (otherwise the overlay might not fit properly)
-    assert (w == 1920 and h == 1080), "Error image has to be 1920x1080" 
-
-    map_image.save(output_dir+"/images/"+filename+".jpg", "JPEG")
-    cur_image_path = output_dir+"/images/"+filename+".jpg"
-    # Iterate through all objects in the order we want them to be added and add them to the backgroundl
-    # Note this function also saves the image already
-    # Point around which the objects will be clustered
-    bias_point = (random.randint(0+padding, w-padding), random.randint(0+padding, h-padding))
-    # Add the overlay, the bias point plays no role here because of the object class (object class -1 is not added to the labels.txt)
-    if random.randint(0,100) > 100 - overlay_chance:
-        add_object(overlay_path, cur_image_path, -1, bias_point, False)
-    for i in range(0, len(objects_to_add)):
-        o = objects_to_add.pop()
-        if len(objects_to_add) == 0:
-            add_object(o[0], cur_image_path, o[1], bias_point, True)
-        else:
-            add_object(o[0], cur_image_path, o[1], bias_point, False)
-    # of no objects were added we still have to create an empty txt file
-    with open(output_dir+"/labels/"+filename+".txt", "a") as f:
-        f.write("")
-
-
+        map_image.save(output_dir+"/images/"+filename+".jpg", "JPEG")
+        cur_image_path = output_dir+"/images/"+filename+".jpg"
+        # Iterate through all objects in the order we want them to be added and add them to the backgroundl
+        # Note this function also saves the image already
+        # Point around which the objects will be clustered
+        bias_point = (random.randint(0+padding, w-padding), random.randint(0+padding, h-padding))
+        # Add the overlay, the bias point plays no role here because of the object class (object class -1 is not added to the labels.txt)
+        if random.randint(0,100) > 100 - overlay_chance:
+            add_object(overlay_path, cur_image_path, -1, bias_point, False)
+        for i in range(0, len(objects_to_add)):
+            o = objects_to_add.pop()
+            if len(objects_to_add) == 0:
+                add_object(o[0], cur_image_path, o[1], bias_point, True)
+            else:
+                add_object(o[0], cur_image_path, o[1], bias_point, False)
+        # of no objects were added we still have to create an empty txt file
+        with open(output_dir+"/labels/"+filename+".txt", "a") as f:
+            f.write("")
     if verbose:
         print("=======================================")
 
