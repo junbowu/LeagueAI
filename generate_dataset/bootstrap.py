@@ -45,49 +45,49 @@ output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_3"
 # Prints a box around the placed object in red (for debug purposes)
 print_box = False
 # Size of the datasets the program should generate
-dataset_size = 500
+dataset_size = 250
 # Beginning index for naming output files
-start_index = 1500
+start_index = 3750
 # How many characters should be added minimum/maximum to each sample
 characters_min = 0
-characters_max = 2
-assert (characters_min < characters_max), "Error, minions_max needs to be larger than minions_min!"
+characters_max = 0
+assert (characters_min <= characters_max), "Error, characters_max needs to be larger than minions_min!"
 # How many minons should be added minimum/maximum to each sample
-minions_min = 1
-minions_max = 12
-assert (minions_min < minions_max), "Error, minions_max needs to be larger than minions_min!"
+minions_min = 0
+minions_max = 15
+assert (minions_min <= minions_max), "Error, minions_max needs to be larger than minions_min!"
 # How many towers should be added to each example
 towers_min = 0
-towers_max = 1
-assert (towers_min < towers_max), "Error, towers_max needs to be larger than towers_min!"
+towers_max = 0
+assert (towers_min <= towers_max), "Error, towers_max needs to be larger than towers_min!"
 # The scale factor of how much a champion image needs to be scaled to have a realistic size
 # Also you can set a random factor to create more diverse images
-scale_champions = 0.8 # 0.7 good
-random_scale_champions = 0.15 # 0.12 is good
+scale_champions = 0.7 # 0.7 good
+random_scale_champions = 0.0 # 0.12 is good
 scale_minions = 1.1 #1.2 good
-random_scale_minions = 0.25 # 0.25 good
-scale_towers = 1.6 # 1.6 good
-random_scale_towers = 0.2 # 0.2 good
+random_scale_minions = 0.0 # 0.25 good
+scale_towers = 1.7 # 1.6 good
+random_scale_towers = 0.0 # 0.2 good
 # Random rotation maximum offset in counter-/clockwise direction
-rotate = 2
+rotate = 7
 # Make champions seethrough sometimes to simulate them being in a brush, value in percent chance a champion will be seethrough
 seethrough_prob = 12
 # Output image size
 output_size = (1920,1080)
 # Factor how close the objects should be clustered around the bias point
-bias_strength = 200 #220 is good
+bias_strength = 300 #220 is good
 # Resampling method of the object scaling
 #sampling_method = Image.BICUBIC
 sampling_method = Image.BILINEAR
 # Add random noise to pixels
-noise = (0,0,0)
+noise = (5,5,5)
 # Sometimes randomly add the overlay
 overlay_chance = 5
 overlay_path = "/home/oli/Workspace/LeagueAI/generate_dataset/overlay.png"
 # Dont spawn objects to close to the border of the image, they might disappear
 padding = 0
 # Probability of adding a fog of war screenshot with no objects in it
-fog_of_war_prob = 5
+fog_of_war_prob = 0
 ########### Helper functions ###################
 """
 This funciton applies random noise to the rgb values of a pixel (R,G,B)
