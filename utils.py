@@ -105,6 +105,7 @@ def write_results(prediction, confidence, num_classes, nms_conf = 0.4):
         image_pred = prediction[ind]          #image Tensor
        #confidence threshholding 
        #NMS
+        print(image_pred)
     
         max_conf, max_conf_score = torch.max(image_pred[:,5:5+ num_classes], 1)
         max_conf = max_conf.float().unsqueeze(1)

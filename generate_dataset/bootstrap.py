@@ -41,24 +41,24 @@ tower_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_towers"
 # --- XYZ1.txt
 # -- train.txt
 # -- test.txt
-output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_3"
+output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_4"
 # Prints a box around the placed object in red (for debug purposes)
 print_box = False
 # Size of the datasets the program should generate
-dataset_size = 250
+dataset_size = 100
 # Beginning index for naming output files
-start_index = 3750
+start_index = 0
 # How many characters should be added minimum/maximum to each sample
 characters_min = 0
-characters_max = 0
+characters_max = 1
 assert (characters_min <= characters_max), "Error, characters_max needs to be larger than minions_min!"
 # How many minons should be added minimum/maximum to each sample
-minions_min = 0
-minions_max = 15
+minions_min = 1
+minions_max = 12
 assert (minions_min <= minions_max), "Error, minions_max needs to be larger than minions_min!"
 # How many towers should be added to each example
 towers_min = 0
-towers_max = 0
+towers_max = 1
 assert (towers_min <= towers_max), "Error, towers_max needs to be larger than towers_min!"
 # The scale factor of how much a champion image needs to be scaled to have a realistic size
 # Also you can set a random factor to create more diverse images
@@ -243,7 +243,7 @@ for dataset in range(0, dataset_size):
         temp_obj_path = masked_images_dir+"/"+temp_obj_folder
         # Select a random masked image of that object
         if temp_obj_folder == "vayne_masked":
-            characters.append([masked_images_dir+"/"+temp_obj_folder+"/"+random.choice(sorted(listdir(temp_obj_path))),14]) 
+            characters.append([masked_images_dir+"/"+temp_obj_folder+"/"+random.choice(sorted(listdir(temp_obj_path))),4]) 
     if verbose: 
         print("Adding {} champions!".format(len(characters)))
 
@@ -254,11 +254,11 @@ for dataset in range(0, dataset_size):
         # Select a random subdirectory because the minions are sorted in subdirectories
         minions_dir = random.choice(sorted(listdir(masked_minions)))
         if minions_dir == "red_canon":
-            minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 6])
+            minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 1])
         elif minions_dir == "red_caster":
-            minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 7])
+            minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 2])
         elif minions_dir == "red_melee":
-            minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 8])
+            minions.append([masked_minions+"/"+minions_dir+"/"+random.choice(sorted(listdir(masked_minions+"/"+minions_dir))), 3])
         else:
             print("Error: This folder: ", minions_dir, " was not specified to contain masked images. Skipping. Atention! Dataset might be broken!")
     if verbose: 

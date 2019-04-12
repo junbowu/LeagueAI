@@ -9,7 +9,7 @@ from utils import *
 import argparse
 import os 
 import os.path as osp
-from yolov3_detector import Darknet
+from yolov3_detector import Detector
 import pickle as pkl
 import pandas as pd
 import random
@@ -49,10 +49,10 @@ batch_size = int(args.bs)
 confidence = float(args.confidence)
 nms_thesh = float(args.nms_thresh)
 start = 0
-CUDA = False#torch.cuda.is_available()
+CUDA = torch.cuda.is_available()
 
 
-
+# TODO make param for this
 num_classes = 5
 classes = load_classes("/home/oli/Workspace/darknet/data/LeagueAI.names")
 
@@ -60,7 +60,7 @@ classes = load_classes("/home/oli/Workspace/darknet/data/LeagueAI.names")
 
 #Set up the neural network
 print("Loading network.....")
-model = Darknet(args.cfgfile)
+model = Detector(args.cfgfile)
 model.load_weights(args.weightsfile)
 print("Network successfully loaded")
 

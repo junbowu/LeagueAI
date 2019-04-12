@@ -2,6 +2,7 @@ __pycache__
 det/*
 
 weights/*.weights
+videos/*
 
 raw_data/*.mp4
 raw_data/red_melee_raw/*

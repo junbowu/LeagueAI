@@ -152,9 +152,9 @@ def create_modules(blocks):
     return (net_info, module_list)
 
 
-class Darknet(nn.Module):
+class Detector(nn.Module):
     def __init__(self,cfgfile):
-        super(Darknet, self).__init__()
+        super(Detector, self).__init__()
         self.blocks = parse_cfg(cfgfile)
         self.net_info, self.module_list = create_modules(self.blocks)
     def forward(self,x, CUDA):

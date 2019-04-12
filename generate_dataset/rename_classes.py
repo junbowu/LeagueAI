@@ -4,7 +4,7 @@ from os import listdir
 # Its not very flexeible but i decided to keep it around in case someone else
 # needs to change the object class numbers
 
-labels_path = "/media/veracrypt5/Sicherungen/Workspace/darknet/Dataset/labels"
+labels_path = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_3/labels"
 
 for i in listdir(labels_path):
     print(i)
