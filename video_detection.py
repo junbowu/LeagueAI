@@ -9,7 +9,7 @@ from utils import *
 import argparse
 import os 
 import os.path as osp
-from yolov3_detector import Darknet
+from yolov3_detector import Detector
 import pickle as pkl
 import pandas as pd
 import random
@@ -21,20 +21,15 @@ def arg_parse():
     """
     
     parser = argparse.ArgumentParser(description='YOLO v3 Detection Module')
+    parser.add_argument("--video", dest = 'videofile', help =  "Video Directory containing images to perform detection upon", default = "vidoe.avi", type = str)
     parser.add_argument("--bs", dest = "bs", help = "Batch size", default = 1)
     parser.add_argument("--confidence", dest = "confidence", help = "Object Confidence to filter predictions", default = 0.5)
-    parser.add_argument("--nms_thresh", dest = "nms_thresh", help = "NMS Threshhold", default = 0.4)
-    parser.add_argument("--cfg", dest = 'cfgfile', help = 
-                        "Config file",
-                        default = "cfg/yolov3.cfg", type = str)
-    parser.add_argument("--weights", dest = 'weightsfile', help = 
-                        "weightsfile",
-                        default = "yolov3.weights", type = str)
-    parser.add_argument("--reso", dest = 'reso', help = 
-                        "Input resolution of the network. Increase to increase accuracy. Decrease to increase speed",
-                        default = "416", type = str)
-    parser.add_argument("--video", dest = "videofile", help = "Video file to     run detection on", default = "video.avi", type = str)
-    
+    parser.add_argument("--nms_thresh", dest = "nms_thresh", help = "NMS Threshhold", default = 0.01)
+    parser.add_argument("--cfg", dest = 'cfgfile', help =  "Config file", default = "cfg/yolov3.cfg", type = str)
+    parser.add_argument("--weights", dest = 'weightsfile', help = "weightsfile", default = "yolov3.weights", type = str)
+    parser.add_argument("--reso", dest = 'reso', help = "Input resolution of the network. Increase to increase accuracy. Decrease to increase speed", default = "960", type = str)
+    parser.add_argument("--classes", dest = 'num_classes', help = "Number of classes", default = 5, type=int)
+    parser.add_argument("--names", dest = 'classes', help = "The file containing the names of the detectable objects", default = "/home/oli/Workspace/LeagueAI/cfg/LeagueAI.names")
     return parser.parse_args()
     
 args = arg_parse()
@@ -43,17 +38,14 @@ confidence = float(args.confidence)
 nms_thesh = float(args.nms_thresh)
 start = 0
 CUDA = torch.cuda.is_available()
-
-
-
-num_classes = 5
-classes = load_classes("/home/oli/Workspace/darknet/data/LeagueAI.names")
+num_classes = args.num_classes
+classes = args.classes
 
 
 
 #Set up the neural network
 print("Loading network.....")
-model = Darknet(args.cfgfile)
+model = Detector(args.cfgfile)
 model.load_weights(args.weightsfile)
 print("Network successfully loaded")
 
@@ -131,7 +123,7 @@ while cap.isOpened():
         
 
         im_dim = im_dim.repeat(output.size(0), 1)
-        scaling_factor = torch.min(416/im_dim,1)[0].view(-1,1)
+        scaling_factor = torch.min(int(args.reso)/im_dim,1)[0].view(-1,1)
         
         output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim[:,0].view(-1,1))/2
         output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim[:,1].view(-1,1))/2

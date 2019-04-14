@@ -21,26 +21,16 @@ def arg_parse():
     """
     
     parser = argparse.ArgumentParser(description='YOLO v3 Detection Module')
-   
-    parser.add_argument("--images", dest = 'images', help = 
-                        "Image / Directory containing images to perform detection upon",
-                        default = "imgs", type = str)
-    parser.add_argument("--det", dest = 'det', help = 
-                        "Image / Directory to store detections to",
-                        default = "det", type = str)
+    parser.add_argument("--images", dest = 'images', help =  "Image / Directory containing images to perform detection upon", default = "imgs", type = str)
+    parser.add_argument("--det", dest = 'det', help = "Image / Directory to store detections to", default = "det", type = str)
     parser.add_argument("--bs", dest = "bs", help = "Batch size", default = 1)
     parser.add_argument("--confidence", dest = "confidence", help = "Object Confidence to filter predictions", default = 0.5)
     parser.add_argument("--nms_thresh", dest = "nms_thresh", help = "NMS Threshhold", default = 0.01)
-    parser.add_argument("--cfg", dest = 'cfgfile', help = 
-                        "Config file",
-                        default = "cfg/yolov3.cfg", type = str)
-    parser.add_argument("--weights", dest = 'weightsfile', help = 
-                        "weightsfile",
-                        default = "yolov3.weights", type = str)
-    parser.add_argument("--reso", dest = 'reso', help = 
-                        "Input resolution of the network. Increase to increase accuracy. Decrease to increase speed",
-                        default = "416", type = str)
-    
+    parser.add_argument("--cfg", dest = 'cfgfile', help =  "Config file", default = "cfg/yolov3.cfg", type = str)
+    parser.add_argument("--weights", dest = 'weightsfile', help = "weightsfile", default = "yolov3.weights", type = str)
+    parser.add_argument("--reso", dest = 'reso', help = "Input resolution of the network. Increase to increase accuracy. Decrease to increase speed", default = "960", type = str)
+    parser.add_argument("--classes", dest = 'num_classes', help = "Number of classes", default = 5, type=int)
+    parser.add_argument("--names", dest = 'classes', help = "The file containing the names of the detectable objects", default = "/home/oli/Workspace/LeagueAI/cfg/LeagueAI.names")
     return parser.parse_args()
     
 args = arg_parse()
@@ -49,14 +39,8 @@ batch_size = int(args.bs)
 confidence = float(args.confidence)
 nms_thesh = float(args.nms_thresh)
 start = 0
+classes = load_classes(args.classes)
 CUDA = torch.cuda.is_available()
-
-
-# TODO make param for this
-num_classes = 5
-classes = load_classes("/home/oli/Workspace/darknet/data/LeagueAI.names")
-
-
 
 #Set up the neural network
 print("Loading network.....")
@@ -123,7 +107,7 @@ for i, batch in enumerate(im_batches):
     with torch.no_grad():
         prediction = model(Variable(batch), CUDA)
 
-    prediction = write_results(prediction, confidence, num_classes, nms_conf = nms_thesh)
+    prediction = write_results(prediction, confidence, args.num_classes, nms_conf = nms_thesh)
 
     end = time.time()
 
@@ -144,11 +128,23 @@ for i, batch in enumerate(im_batches):
     else:
         output = torch.cat((output,prediction))
 
+    # The output contains an a list of all objects with 
+    # 0: image id
+    # 1:
+    # 2:
+    # 3:
+    # 6: Confidence
+    # 7: Object class
+
     for im_num, image in enumerate(imlist[i*batch_size: min((i +  1)*batch_size, len(imlist))]):
         im_id = i*batch_size + im_num
         objs = [classes[int(x[-1])] for x in output if int(x[0]) == im_id]
+        confidences = [x[-2] for x in output if int(x[0]) == im_id]
         print("{0:20s} predicted in {1:6.3f} seconds".format(image.split("/")[-1], (end - start)/batch_size))
-        print("{0:20s} {1:s}".format("Objects Detected:", " ".join(objs)))
+        print("Objects Detected:")
+        print("-----------------")
+        for i, o in enumerate(objs):
+            print(o, " ", round(float(confidences[i])*99, 2), "%")
         print("----------------------------------------------------------")
 
     if CUDA:
@@ -161,13 +157,10 @@ except NameError:
 
 im_dim_list = torch.index_select(im_dim_list, 0, output[:,0].long())
 
-scaling_factor = torch.min(416/im_dim_list,1)[0].view(-1,1)
-
+scaling_factor = torch.min(inp_dim/im_dim_list, 1)[0].view(-1,1)
 
 output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim_list[:,0].view(-1,1))/2
 output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim_list[:,1].view(-1,1))/2
-
-
 
 output[:,1:5] /= scaling_factor
 

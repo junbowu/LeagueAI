@@ -12,6 +12,7 @@ raw_data/tower_raw/*
 raw_data/red_canon_raw/*
 raw_data/map_raw
 raw_data/*.kdenlive
+raw_data/cursor
 
 generate_dataset/map/*
 generate_dataset/map_fog/*

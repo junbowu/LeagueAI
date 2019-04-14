@@ -4,10 +4,20 @@ Implementation of an A.I. Player for the videogame League of Legends based on Im
 Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch?v=KRWFCaXfOTk
 
 ## TODO
-- Create script to automatically split data in train and test set
+1) Dataset generation
+- Towers in fog of war
+- Turret plating
+- Fog of war strucutres, maybe fog of war filter?
+- Dead minnions
+- Add random particles to the screenshots, explosions and so on
+- More different cursors
 
 ## Currently Detectable Objects
-TODO
+- Red Tower
+- Red Canon Minion
+- Red Caster Minion
+- Red Melee Minion
+- Vayne
 
 ## Missing Objects
 - All champions except vayne
@@ -32,14 +42,26 @@ Therefore, the new dataset was created by automatically generating training data
 To obtain the image data I used the online League of Legends model viewer from https://teemo.gg/model-viewer.
 For each ingame object and each animation I recorded a short video clip while rotating the 3D model.
 Next I used the pyFrameExporter.py script to extract individual pictures from the clips.
-For each of the 
-For the minions I used Adobe After Effects to remove the background
+For the minions I used Adobe After Effects to add a green background to the videos of the minions and towers (all objects where I could not find the 3D models).
+For each of the objects exported frames I used the pyExportTransparentPNG.py script.
+The script removes the green/purple background from the individual screenshots and leaves you with the masked png of an objects.
+Furthermore, the scrip crops the images to the content and removes excess seethrough space.
+
+This leaves me with about 1000 masked images of each object that can be later used to generate labeled fake screenshots of the game.
 
 2. Combining the masked and cropped images with game background 
-In order to generate a large amount of training data that cover all regions of the game map, generated a series of 200 screenshots from all over the map.
-Then the masked and cropped images are randomly combined with the map screenshots.
+To generate a large amount of training data that cover all regions of the game map, I generated a series of 200 screenshots from all over the map using the frame exporter script.
+Then the masked and cropped images from step 1 are randomly combined with the map screenshots using the bootstrap.py script.
 Since we place the images using a script it is possible to obtain the objects position in the image and thus automatically generate a label for it.
 
-The result is a dataset of XXXXXX labeled images that can be increased anytime by randomly placing the objects on the map.
+To generate a large variety of screenshots the script can be adjusted to:
+- change the random amount of champions, minions and other objects 
+- randomly add a number of cursers
+- randomly add the game HUD to the screenshot
+- randomly scale all the objects
+- cluster the minions to create more realistic clumps of fighting minions
+- apply gaussian blur and random noise to the image
+
+Using this method a dataset of many thousands of different labeled fake screenshots can be generated in a matter of hours.
 
 ## Extracting health information
