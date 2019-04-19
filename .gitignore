@@ -1,6 +1,7 @@
 __pycache__
 det/*
 *.pyc
+*.swp
 
 weights/*.weights
 videos/*
