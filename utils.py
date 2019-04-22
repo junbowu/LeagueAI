@@ -1,3 +1,6 @@
+# Based on https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
+# Not used by the LeaguaAI framework
+
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F 

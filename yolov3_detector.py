@@ -1,3 +1,5 @@
+# Based on https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

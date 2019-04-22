@@ -1,3 +1,6 @@
+#Copyright 2019 Oliver Struckmeier
+#Licensed under the GNU General Public License, version 3.0. See LICENSE for details
+
 import numpy as np
 from PIL import Image
 from PIL import ImageFilter

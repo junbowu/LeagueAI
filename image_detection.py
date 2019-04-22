@@ -1,3 +1,6 @@
+# Based on https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
+# Not used by LeagueAI framework, made it to work with my dataset for testing
+
 from __future__ import division
 import time
 import torch 

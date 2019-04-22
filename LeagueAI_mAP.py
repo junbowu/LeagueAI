@@ -1,3 +1,8 @@
+#Copyright 2019 Oliver Struckmeier
+#Licensed under the GNU General Public License, version 3.0. See LICENSE for details
+
+# This script us used to compute the detection precision mAP of a model against a test dataset
+
 from LeagueAI_helper import input_output, LeagueAIFramework, detection
 import time
 import cv2

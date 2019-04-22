@@ -1,3 +1,6 @@
+#Copyright 2019 Oliver Struckmeier
+#Licensed under the GNU General Public License, version 3.0. See LICENSE for details
+
 from LeagueAI_helper import input_output, LeagueAIFramework, detection
 import time
 import cv2

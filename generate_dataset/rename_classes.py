@@ -1,8 +1,11 @@
+#Copyright 2019 Oliver Struckmeier
+#Licensed under the GNU General Public License, version 3.0. See LICENSE for details
+
 from os import listdir
 
 # This script was used because initially some classes in the label folders had wrong number representations
 # Its not very flexeible but i decided to keep it around in case someone else
-# needs to change the object class numbers
+# needs to change the object class numbers after generating a dataset
 
 labels_path = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_3/labels"
 

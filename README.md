@@ -5,12 +5,20 @@ Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch
 
 ## TODO
 1) Dataset generation
+- Fix some bugs with the tower cropping of the raw data
 - Towers in fog of war
 - Turret plating
 - Fog of war strucutres, maybe fog of war filter?
 - Dead minnions
 - Add random particles to the screenshots, explosions and so on
 - More different cursors
+
+2) Project
+- Make new dataset with proper towers
+- Transform old tensorflow dataset annotations and retrain
+
+3) Vayne bot
+- TODO
 
 ## Currently Detectable Objects
 - Red Tower
@@ -65,3 +73,8 @@ To generate a large variety of screenshots the script can be adjusted to:
 Using this method a dataset of many thousands of different labeled fake screenshots can be generated in a matter of hours.
 
 ## Extracting health information
+
+
+# Sources
+- Implementing Yolov3 object detection from scratch: https://github.com/ayooshkathuria/YOLO_v3_tutorial_from_scratch
+- For training: https://pjreddie.com/darknet/yolo/, Yolov3: An Incremental Improvement, J. Redmond and A. Farhadi, 2018

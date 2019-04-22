@@ -1,3 +1,6 @@
+#Copyright 2019 Oliver Struckmeier
+#Licensed under the GNU General Public License, version 3.0. See LICENSE for details
+
 from os import listdir
 import numpy as np
 import random

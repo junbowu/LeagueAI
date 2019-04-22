@@ -1,6 +1,11 @@
+#Copyright 2019 Oliver Struckmeier
+#Licensed under the GNU General Public License, version 3.0. See LICENSE for details
+
 from os import listdir
 import numpy as np
 import random
+
+# This script is used to split the datasets generated with bootstrap.py into test and training dataset
 
 # Attention if you use darknet to train: the structure has to be exactly as follows:
 # - Dataset
