@@ -113,10 +113,9 @@ class LeagueAIFramework():
             output = self.detector(Variable(frame), self.cuda)
         output = self.write_results(output)
 
-
-        if type(output) == int:
+        if type(output) == int or output.size(0) <= 0:
             print("No detection")
-            return 0
+            return []
 
         im_dim = im_dim.repeat(output.size(0), 1)
         scaling_factor = torch.min(int(self.resolution)/im_dim,1)[0].view(-1,1)
@@ -136,7 +135,7 @@ class LeagueAIFramework():
         # Create a dict of all objects with their x,y center pos and width/height
         detected_objects = []
         for i in range(output.shape[0]):
-            d = detection(output[i][0], output[i][1], output[i][2], output[i][3], output[i][4])
+            d = detection(output[i][7], output[i][1], output[i][2], output[i][3], output[i][4])
             detected_objects.append(d)
         return detected_objects
 

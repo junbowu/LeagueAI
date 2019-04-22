@@ -6,6 +6,7 @@ det/*
 weights/*.weights
 videos/*
 images/*
+test_map/*
 
 raw_data/*.mp4
 raw_data/red_melee_raw/*

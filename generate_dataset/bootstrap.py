@@ -4,6 +4,9 @@ from PIL import ImageFilter
 from os import listdir
 import random
 
+####### TODO ##############
+#- Generate new dataset with corrected tower images and grouped minions for test
+#- Make a dataset for the handlabeled data and train a model to compare to 
 ####### Object Classes ####
 # 0: Red Tower
 # 1: Red Canon
@@ -36,13 +39,13 @@ tower_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/masked_towers"
 # --- XYZ1.txt
 # -- train.txt
 # -- test.txt
-output_dir = "/home/oli/Workspace/LeagueAI/generate_dataset/Dataset_4"
+output_dir = "/home/oli/Workspace/LeagueAI/test_map/"
 # Prints a box around the placed object in red (for debug purposes)
-print_box = False
+print_box = True
 # Size of the datasets the program should generate
-dataset_size = 250
+dataset_size = 15
 # Beginning index for naming output files
-start_index = 7000
+start_index = 0
 # How many characters should be added minimum/maximum to each sample
 characters_min = 0
 characters_max = 3
@@ -75,7 +78,7 @@ bias_strength = 230 # 220 is good, dont select too large or the objects will be 
 #sampling_method = Image.BICUBIC
 sampling_method = Image.BILINEAR #IMO the best but use both to have more different methods
 # Add random noise to pixels
-noise = (15,15,15)
+noise = (0,0,0)
 # Blur the image
 blur = False
 blur_strength = 0.6 # 0.6 is a good value

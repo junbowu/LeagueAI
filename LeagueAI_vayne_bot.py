@@ -29,7 +29,7 @@ while True:
     start_time = time.time()
     # Get the current frame from either a video, a desktop region or webcam (for whatever reason)
     frame = IO.get_pixels()
-    # Get the dictionary of detected objects and their positions
+    # Get the list of detected objects and their positions
     objects = LeagueAI.get_objects(frame)
     for o in objects:
         o.toString()
