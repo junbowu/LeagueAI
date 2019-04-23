@@ -7,6 +7,11 @@ weights/*.weights
 videos/*
 images/*
 test_map/*
+papers/*
+report/*
+generate_dataset/2017_LeagueAIDataset/*.jpg
+generate_dataset/2017_LeagueAIDataset/*.xml
+generate_dataset/2017_LeagueAIDataset/*.txt
 
 raw_data/*.mp4
 raw_data/red_melee_raw/*
