@@ -14,8 +14,10 @@ Demo video of Tensorflow implementation from 2017: https://www.youtube.com/watch
 - More different cursors
 
 2) Project
+- Create real live test dataset with both vayne skins
 - Make new dataset with proper towers
-- Transform old tensorflow dataset annotations and retrain
+- There seems to be a bug with the old dataset when using the mAP script (images have a different resolution)
+- Train a model with the old dataset
 
 3) Vayne bot
 - TODO

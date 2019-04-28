@@ -58,7 +58,7 @@ def compute_map(object_box, object_class, all_boxes, w_in, h_in):
     return max(iou), best_match_obect[iou.index(max(iou))]
 
 name_file = "/home/oli/Workspace/LeagueAI/cfg/LeagueAI.names"
-names = load_classes(name_file)
+names = ['Tower', 'EnemyMinion', 'Vayne']#load_classes(name_file)
 image_folder = "test_map/images/"
 label_folder = "test_map/labels/"
 output_size = (int(1920/2), int(1080/2))
@@ -68,7 +68,7 @@ mAP_threshold = 0.5
 LeagueAI = LeagueAIFramework(config_file="cfg/LeagueAI.cfg", weights="weights/04_16_LeagueAI.weights", names_file="cfg/LeagueAI.names", classes_number = classes_number, resolution=960, threshold = 0.5, cuda=True, draw_boxes=True)
 
 files = sorted(listdir(image_folder))
-show_images = False
+show_images = True
 
 mAP_avg = [0] * classes_number
 mAP_ground_truth = [0] * classes_number
